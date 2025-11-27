@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LCP Media Loading</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #0f1014;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            overflow: hidden;
+            -webkit-app-region: drag;
+        }
+        .logo-container {
+            width: 100px;
+            height: 100px;
+            /* Hapus background gradient jika logo Anda sudah punya warna */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: pulse 2s infinite;
+        }
+        /* Style agar logo pas */
+        .logo-img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            filter: drop-shadow(0 0 20px rgba(249, 115, 22, 0.4)); /* Efek glow orange */
+        }
+        h1 {
+            color: white;
+            margin-top: 20px;
+            font-size: 18px;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+        p {
+            color: #71717a;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+    </style>
+</head>
+<body>
+    <div class="logo-container">
+        <img src="public/logo.png" alt="Logo" class="logo-img">
+    </div>
+    <h1>LCP Media</h1>
+    <p>Loading your library...</p>
+</body>
+</html>
