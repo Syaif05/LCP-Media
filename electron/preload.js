@@ -2,7 +2,9 @@
 const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('electron', {
+  // ... (SAMA SEPERTI SEBELUMNYA) ...
   selectFolder: () => ipcRenderer.invoke('select-folder'),
+  toggleMiniPlayer: (isMini) => ipcRenderer.invoke('toggle-mini-player', isMini),
   getCourses: () => ipcRenderer.invoke('get-courses'),
   deleteCourse: (id) => ipcRenderer.invoke('delete-course', id),
   renameCourse: (data) => ipcRenderer.invoke('rename-course', data),
@@ -29,10 +31,27 @@ contextBridge.exposeInMainWorld('electron', {
   deleteDownload: (path) => ipcRenderer.invoke('delete-download', path),
   startDownload: (data) => ipcRenderer.invoke('start-download', data),
   checkFileExists: (path) => ipcRenderer.invoke('check-file-exists', path),
+  
+  selectMusicFolder: () => ipcRenderer.invoke('select-music-folder'),
+  
+  // API BARU
+  importPlaylistFromFolder: () => ipcRenderer.invoke('import-playlist-from-folder'),
+  
+  getMusicPath: () => ipcRenderer.invoke('get-music-path'),
+  scanMusicLibrary: () => ipcRenderer.invoke('scan-music-library'),
+  
+  getPlaylists: () => ipcRenderer.invoke('get-playlists'),
+  createPlaylist: (name) => ipcRenderer.invoke('create-playlist', name),
+  deletePlaylist: (id) => ipcRenderer.invoke('delete-playlist', id),
+  addSongToPlaylist: (data) => ipcRenderer.invoke('add-song-to-playlist', data),
+  removeSongFromPlaylist: (data) => ipcRenderer.invoke('remove-song-from-playlist', data),
+  
+  getLikedSongs: () => ipcRenderer.invoke('get-liked-songs'),
+  toggleLikeSong: (song) => ipcRenderer.invoke('toggle-like-song', song),
+  getRecentlyPlayed: () => ipcRenderer.invoke('get-recently-played'),
+  addToRecentlyPlayed: (song) => ipcRenderer.invoke('add-to-recently-played', song),
 
-  // Listener Baru untuk Open With
   onOpenFileDirect: (callback) => ipcRenderer.on('open-file-direct', (event, filePath) => callback(filePath)),
-
   onDownloadProgress: (callback) => ipcRenderer.on('download-progress', (event, data) => callback(data)),
   removeDownloadListener: () => ipcRenderer.removeAllListeners('download-progress'),
 

@@ -11,13 +11,17 @@ const defaultDownloadPath = path.join(app.getPath('videos'), 'LCP_Downloads');
 function readDb() {
   try {
     if (!fs.existsSync(dbPath)) {
-      const initialData = { courses: [] };
+      const initialData = { courses: [], musicPlaylists: [], likedSongs: [], recentlyPlayed: [] };
       fs.writeFileSync(dbPath, JSON.stringify(initialData));
       return initialData;
     }
-    return JSON.parse(fs.readFileSync(dbPath, 'utf-8'));
+    const data = JSON.parse(fs.readFileSync(dbPath, 'utf-8'));
+    if (!data.musicPlaylists) data.musicPlaylists = [];
+    if (!data.likedSongs) data.likedSongs = [];
+    if (!data.recentlyPlayed) data.recentlyPlayed = [];
+    return data;
   } catch (error) {
-    return { courses: [] };
+    return { courses: [], musicPlaylists: [], likedSongs: [], recentlyPlayed: [] };
   }
 }
 
@@ -25,7 +29,6 @@ function writeDb(data) {
   fs.writeFileSync(dbPath, JSON.stringify(data, null, 2));
 }
 
-// ... (getSettings & saveSettings TETAP SAMA) ...
 function getSettings() {
   try {
     if (!fs.existsSync(settingsPath)) {
@@ -44,13 +47,12 @@ function saveSettings(settings) {
   fs.writeFileSync(settingsPath, JSON.stringify(settings, null, 2));
 }
 
-// ... (addCourse, getCourses TETAP SAMA) ...
 function addCourse(course) {
   const db = readDb();
   const exists = db.courses.find(c => c.path === course.path);
   if (!exists) {
     course.data = {}; 
-    course.lastPlayedAt = new Date().toISOString(); 
+    course.lastPlayedAt = new Date().toISOString();
     course.displayName = course.title; 
     db.courses.push(course);
     writeDb(db);
@@ -63,32 +65,22 @@ function getCourses() {
   return db.courses.sort((a, b) => new Date(b.lastPlayedAt || 0) - new Date(a.lastPlayedAt || 0));
 }
 
-// UPDATE: Handle 'progress' (currentTime)
 function updateVideoData(coursePath, videoId, key, value) {
   const db = readDb();
   const courseIndex = db.courses.findIndex(c => c.path === coursePath);
-  
   if (courseIndex !== -1) {
     if (!db.courses[courseIndex].data) db.courses[courseIndex].data = {};
     if (!db.courses[courseIndex].data[videoId]) db.courses[courseIndex].data[videoId] = {};
-    
-    // Simpan data spesifik
     db.courses[courseIndex].data[videoId][key] = value;
-    
-    // Update persentase global kursus hanya jika status 'watched' berubah
-    if (key === 'watched') {
-      const totalVideos = db.courses[courseIndex].totalVideos;
-      const watchedCount = Object.values(db.courses[courseIndex].data).filter(v => v.watched).length;
-      db.courses[courseIndex].progress = Math.round((watchedCount / totalVideos) * 100);
-    }
-
+    const totalVideos = db.courses[courseIndex].totalVideos;
+    const watchedCount = Object.values(db.courses[courseIndex].data).filter(v => v.watched).length;
+    db.courses[courseIndex].progress = Math.round((watchedCount / totalVideos) * 100);
     writeDb(db);
     return db.courses[courseIndex];
   }
   return null;
 }
 
-// ... (Sisa fungsi: updateLastPlayed, attachment, dll TETAP SAMA, copy paste dari sebelumnya) ...
 function updateLastPlayed(coursePath, videoId) {
   const db = readDb();
   const courseIndex = db.courses.findIndex(c => c.path === coursePath);
@@ -135,14 +127,13 @@ function getVideoData(coursePath, videoId) {
   const db = readDb();
   const course = db.courses.find(c => c.path === coursePath);
   if (course && course.data && course.data[videoId]) {
-    return course.data[videoId]; // Mengembalikan object { watched, note, currentTime, etc }
+    return course.data[videoId];
   }
-  // Default values
-  return { watched: false, note: '', attachments: [], currentTime: 0 };
+  return { watched: false, note: '', attachments: [] };
 }
 
 function resetDatabase() {
-  const initialData = { courses: [] };
+  const initialData = { courses: [], musicPlaylists: [], likedSongs: [], recentlyPlayed: [] };
   writeDb(initialData);
   return [];
 }
@@ -169,9 +160,105 @@ function renameCourse(courseId, newName) {
   return false;
 }
 
+function getPlaylists() {
+  const db = readDb();
+  return db.musicPlaylists || [];
+}
+
+function createPlaylist(name, initialSongs = []) {
+  const db = readDb();
+  const newPlaylist = {
+    id: Date.now().toString(),
+    name: name,
+    createdAt: new Date().toISOString(),
+    songs: initialSongs
+  };
+  if (!db.musicPlaylists) db.musicPlaylists = [];
+  db.musicPlaylists.push(newPlaylist);
+  writeDb(db);
+  return db.musicPlaylists;
+}
+function deletePlaylist(id) {
+  const db = readDb();
+  db.musicPlaylists = db.musicPlaylists.filter(p => p.id !== id);
+  writeDb(db);
+  return db.musicPlaylists;
+}
+
+function addSongToPlaylist(playlistId, song) {
+  const db = readDb();
+  const playlist = db.musicPlaylists.find(p => p.id === playlistId);
+  if (playlist) {
+    if (!playlist.songs.find(s => s.path === song.path)) {
+      playlist.songs.push(song);
+      writeDb(db);
+    }
+    return playlist.songs;
+  }
+  return [];
+}
+
+function removeSongFromPlaylist(playlistId, songPath) {
+  const db = readDb();
+  const playlist = db.musicPlaylists.find(p => p.id === playlistId);
+  if (playlist) {
+    playlist.songs = playlist.songs.filter(s => s.path !== songPath);
+    writeDb(db);
+    return playlist.songs;
+  }
+  return [];
+}
+
+// NEW: Liked Songs Handler
+function getLikedSongs() {
+  const db = readDb();
+  return db.likedSongs || [];
+}
+
+function toggleLikeSong(song) {
+  const db = readDb();
+  if (!db.likedSongs) db.likedSongs = [];
+  
+  const index = db.likedSongs.findIndex(s => s.path === song.path);
+  if (index === -1) {
+    db.likedSongs.push(song); // Like
+  } else {
+    db.likedSongs.splice(index, 1); // Unlike
+  }
+  writeDb(db);
+  return db.likedSongs;
+}
+
+// NEW: Recently Played Handler
+function addToRecentlyPlayed(song) {
+  const db = readDb();
+  if (!db.recentlyPlayed) db.recentlyPlayed = [];
+  
+  // Remove if exists (to move to top)
+  db.recentlyPlayed = db.recentlyPlayed.filter(s => s.path !== song.path);
+  
+  // Add to front
+  db.recentlyPlayed.unshift({ ...song, playedAt: new Date().toISOString() });
+  
+  // Limit to 50
+  if (db.recentlyPlayed.length > 50) {
+    db.recentlyPlayed = db.recentlyPlayed.slice(0, 50);
+  }
+  
+  writeDb(db);
+  return db.recentlyPlayed;
+}
+
+function getRecentlyPlayed() {
+  const db = readDb();
+  return db.recentlyPlayed || [];
+}
+
 module.exports = { 
   addCourse, getCourses, updateVideoData, getVideoData, 
   addVideoAttachment, removeVideoAttachment, updateLastPlayed, 
   resetDatabase, getSettings, saveSettings,
-  deleteCourse, renameCourse 
+  deleteCourse, renameCourse,
+  getPlaylists, createPlaylist, deletePlaylist, addSongToPlaylist, removeSongFromPlaylist,
+  getLikedSongs, toggleLikeSong, getRecentlyPlayed, addToRecentlyPlayed
 };

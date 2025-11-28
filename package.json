@@ -1,7 +1,9 @@
 {
   "name": "lcp-media",
   "private": true,
-  "version": "0.3.0",
+  "version": "0.5.0",
+  "description": "Aplikasi media player lokal modern untuk video pembelajaran dan musik.",
+  "author": "Syaifulloh",
   "main": "electron/main.js",
   "scripts": {
     "dev": "concurrently \"vite\" \"wait-on tcp:5173 && electron .\"",
@@ -13,23 +15,48 @@
   "build": {
     "appId": "com.lcpmedia.app",
     "productName": "LCP Media",
-    "win": {
-      "target": "nsis",
-      "icon": "assets/icon.ico"
-    },
-    "fileAssociations": [
-      {
-        "ext": ["mp4", "mkv", "avi", "mov", "webm"],
-        "name": "Video File",
-        "role": "Viewer"
-      }
+    "copyright": "Copyright © 2025 Syaifulloh",
+    "files": [
+      "dist/**/*",
+      "electron/**/*",
+      "package.json"
     ],
     "directories": {
       "output": "dist-electron"
-    }
+    },
+    "win": {
+      "target": "nsis",
+      "icon": "assets/icon.ico",
+      "artifactName": "${productName} Setup ${version}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    },
+    "fileAssociations": [
+      {
+        "ext": [
+          "mp4",
+          "mkv",
+          "avi",
+          "mov",
+          "webm",
+          "mp3",
+          "flac",
+          "wav",
+          "ogg",
+          "m4a"
+        ],
+        "name": "Media File",
+        "role": "Viewer"
+      }
+    ]
   },
   "dependencies": {
     "clsx": "^2.1.0",
+    "color": "^5.0.3",
     "ffmpeg-static": "^5.3.0",
     "ffprobe-static": "^3.1.0",
     "fluent-ffmpeg": "^2.1.3",
@@ -38,6 +65,8 @@
     "i18next-browser-languagedetector": "^7.2.0",
     "lowdb": "^7.0.1",
     "lucide-react": "^0.344.0",
+    "music-metadata": "^11.10.3",
+    "music-metadata-browser": "^2.5.11",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-i18next": "^14.0.5",

@@ -1,3 +1,4 @@
+// src/components/TitleBar.jsx
 import React from 'react';
 import { Minus, Square, X } from 'lucide-react';
 
@@ -8,35 +9,31 @@ const TitleBar = () => {
   const handleClose = () => window.electron.close();
 
   return (
-    <div className="h-8 w-full flex items-center justify-between bg-light-bg dark:bg-dark-bg border-b border-light-border dark:border-dark-border select-none z-50">
-      
-      {/* Area Drag (Judul) */}
-      <div className="flex-1 h-full app-drag-region flex items-center pl-4">
-        <span className="text-xs font-semibold text-slate-500 dark:text-zinc-500 tracking-wide">LCP Media</span>
-      </div>
+    <div className="h-8 w-full flex items-center justify-between select-none z-50 shrink-0 app-drag-region px-2 pt-2">
+      {/* Kosongkan kiri agar bersih */}
+      <div className="flex-1"></div>
 
-      {/* Area Tombol (No Drag) */}
-      <div className="flex h-full no-drag">
+      {/* Window Controls (Mac Styleish but for Windows) */}
+      <div className="flex items-center gap-1 no-drag bg-white/50 dark:bg-black/30 backdrop-blur-md rounded-lg p-1 border border-white/10 shadow-sm">
         <button 
           onClick={handleMinimize}
-          className="w-10 h-full flex items-center justify-center text-slate-500 hover:bg-slate-200 dark:hover:bg-white/10 transition-colors"
+          className="w-8 h-6 flex items-center justify-center rounded hover:bg-slate-200 dark:hover:bg-white/10 text-slate-500 dark:text-slate-400 transition-colors"
         >
           <Minus size={14} />
         </button>
         <button 
           onClick={handleMaximize}
-          className="w-10 h-full flex items-center justify-center text-slate-500 hover:bg-slate-200 dark:hover:bg-white/10 transition-colors"
+          className="w-8 h-6 flex items-center justify-center rounded hover:bg-slate-200 dark:hover:bg-white/10 text-slate-500 dark:text-slate-400 transition-colors"
         >
           <Square size={12} />
         </button>
         <button 
           onClick={handleClose}
-          className="w-10 h-full flex items-center justify-center text-slate-500 hover:bg-red-500 hover:text-white transition-colors"
+          className="w-8 h-6 flex items-center justify-center rounded hover:bg-red-500 hover:text-white text-slate-500 dark:text-slate-400 transition-colors"
         >
           <X size={14} />
         </button>
       </div>
-
     </div>
   );
 };

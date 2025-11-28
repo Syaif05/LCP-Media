@@ -1,10 +1,20 @@
 // src/components/player/PlaylistSidebar.jsx
 import React from 'react';
-import { Play, CheckCircle, Check } from 'lucide-react';
+import { Play, CheckCircle, Check, ListVideo } from 'lucide-react';
 import { Virtuoso } from 'react-virtuoso';
 
 const PlaylistSidebar = ({ videos, currentVideo, watchedVideos, onVideoChange, onToggleWatched }) => {
   
+  // Jika video kosong, tampilkan pesan
+  if (!videos || videos.length === 0) {
+    return (
+      <div className="flex-1 bg-white dark:bg-[#18181b] rounded-2xl border border-slate-200 dark:border-white/5 flex flex-col items-center justify-center h-full text-slate-400">
+        <ListVideo size={48} className="mb-2 opacity-20" />
+        <p className="text-sm">No videos found.</p>
+      </div>
+    );
+  }
+
   const Row = ({ index, data }) => {
     const video = data;
     const isWatched = watchedVideos[video.id]?.watched;
@@ -13,7 +23,7 @@ const PlaylistSidebar = ({ videos, currentVideo, watchedVideos, onVideoChange, o
     return (
       <div className="px-2 py-0.5">
         <div 
-          className={`group flex items-stretch gap-0 rounded-xl transition-all border overflow-hidden ${
+          className={`group flex items-stretch gap-0 rounded-xl transition-all border overflow-hidden cursor-pointer ${
             isActive 
               ? 'bg-orange-50 dark:bg-orange-500/10 border-orange-200 dark:border-orange-500/30 shadow-sm' 
               : 'border-transparent hover:bg-slate-50 dark:hover:bg-zinc-800/50'
@@ -33,7 +43,7 @@ const PlaylistSidebar = ({ videos, currentVideo, watchedVideos, onVideoChange, o
             )}
           </button>
 
-          <button
+          <div
             onClick={() => onVideoChange(video)}
             className="flex-1 flex flex-col justify-center py-3 px-3 text-left min-w-0"
           >
@@ -51,7 +61,7 @@ const PlaylistSidebar = ({ videos, currentVideo, watchedVideos, onVideoChange, o
             } ${isWatched ? 'opacity-60' : ''}`}>
               {video.baseName}
             </h4>
-          </button>
+          </div>
 
           {isActive && (
               <div className="w-1 bg-orange-500"></div>
@@ -62,15 +72,16 @@ const PlaylistSidebar = ({ videos, currentVideo, watchedVideos, onVideoChange, o
   };
 
   return (
-    <div className="flex-1 bg-white dark:bg-[#18181b] rounded-2xl border border-slate-200 dark:border-white/5 flex flex-col overflow-hidden shadow-sm h-full">
+    <div className="flex-1 bg-white dark:bg-[#18181b] rounded-2xl border border-slate-200 dark:border-white/5 flex flex-col overflow-hidden shadow-sm h-full w-full">
       <div className="p-4 border-b border-slate-100 dark:border-white/5 bg-slate-50/50 dark:bg-zinc-900/30 flex justify-between items-center shrink-0">
         <h3 className="text-xs font-bold text-slate-400 dark:text-zinc-400 uppercase tracking-widest">Course Content</h3>
         <span className="text-[10px] px-2 py-0.5 bg-slate-200 dark:bg-zinc-800 rounded-full text-slate-500 dark:text-zinc-400">{videos.length} items</span>
       </div>
       
-      <div className="flex-1 overflow-hidden">
+      {/* Wadah Flex-1 agar mengisi sisa tinggi */}
+      <div className="flex-1 overflow-hidden h-full">
         <Virtuoso
-          style={{ height: '100%' }}
+          style={{ height: '100%' }} // Wajib 100%
           data={videos}
           itemContent={(index, video) => <Row index={index} data={video} />}
           className="custom-scrollbar"

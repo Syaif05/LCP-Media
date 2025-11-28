@@ -1,19 +1,30 @@
 // src/App.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { Toaster } from 'sonner';
+import { Loader2 } from 'lucide-react';
 import MainLayout from './layouts/MainLayout';
-import CoursePlayer from './components/CoursePlayer';
-import DashboardView from './components/views/DashboardView';
-import SettingsView from './components/views/SettingsView';
-import LibraryView from './components/views/LibraryView';
-import QuickPlayerView from './components/views/QuickPlayerView'; // Import Baru
 import ActionModal from './components/modals/ActionModal';
+import ErrorBoundary from './components/ErrorBoundary';
+
+const DashboardView = lazy(() => import('./components/views/DashboardView'));
+const LibraryView = lazy(() => import('./components/views/LibraryView'));
+const SettingsView = lazy(() => import('./components/views/SettingsView'));
+const MusicView = lazy(() => import('./components/views/MusicView'));
+const CoursePlayer = lazy(() => import('./components/CoursePlayer'));
+const QuickPlayerView = lazy(() => import('./components/views/QuickPlayerView'));
+
+const PageLoader = () => (
+  <div className="flex h-full w-full items-center justify-center text-orange-500">
+    <Loader2 size={40} className="animate-spin" />
+  </div>
+);
 
 function App() {
   const [courses, setCourses] = useState([]);
   const [view, setView] = useState('dashboard');
   const [selectedCourse, setSelectedCourse] = useState(null);
-  const [quickFilePath, setQuickFilePath] = useState(null); // State baru untuk quick play
+  const [quickFilePath, setQuickFilePath] = useState(null);
+  const [isMiniMode, setIsMiniMode] = useState(false);
   
   const [searchQuery, setSearchQuery] = useState('');
   const [activeMenu, setActiveMenu] = useState('dashboard');
@@ -34,16 +45,20 @@ function App() {
 
   useEffect(() => {
     loadCourses();
-    
-    // Listener untuk Open With (File Association)
     if (window.electron && window.electron.onOpenFileDirect) {
       window.electron.onOpenFileDirect((filePath) => {
         setQuickFilePath(filePath);
         setView('quickplay');
-        setIsSidebarCollapsed(true); // Auto collapse sidebar biar fokus
+        setIsSidebarCollapsed(true);
       });
     }
   }, []);
+
+  const handleToggleMiniPlayer = async () => {
+    const newState = !isMiniMode;
+    await window.electron.toggleMiniPlayer(newState);
+    setIsMiniMode(newState);
+  };
 
   const filteredCourses = courses.filter(course =>
     (course.title || '').toLowerCase().includes(searchQuery.toLowerCase())
@@ -72,6 +87,7 @@ function App() {
   };
 
   const handleBackToDashboard = () => {
+    if (isMiniMode) handleToggleMiniPlayer();
     setSelectedCourse(null);
     setQuickFilePath(null);
     setView('dashboard');
@@ -94,8 +110,11 @@ function App() {
     setActiveMenu(menuId);
     if (menuId === 'settings') {
       handleOpenSettings();
+      setView('settings');
     } else if (menuId === 'library') {
       setView('library');
+    } else if (menuId === 'music') {
+      setView('music');
     } else {
       setView('dashboard');
     }
@@ -104,7 +123,6 @@ function App() {
   const handleOpenSettings = async () => {
     const path = await window.electron.getAppPath();
     setAppPath(path || '');
-    setView('settings');
   };
 
   const handleOpenDataFolder = async () => {
@@ -145,57 +163,69 @@ function App() {
       onOpenCourse={handleOpenCourse}
       isSidebarCollapsed={isSidebarCollapsed}
       toggleSidebar={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+      disableScroll={view === 'player' || view === 'quickplay'} 
+      isMiniMode={isMiniMode}
+      onToggleMiniMode={handleToggleMiniPlayer} // UPDATE: Pass Handler
     >
       <Toaster position="bottom-right" theme="system" richColors closeButton />
       
-      {view === 'dashboard' && (
-        <DashboardView
-          courses={filteredCourses}
-          lastPlayedCourse={lastPlayedCourse}
-          onOpenCourse={handleOpenCourse}
-          onCreateCourse={handleCreateCourse}
-          onRenameCourse={openRenameModal}
-          onDeleteCourse={openDeleteModal}
-          onSeeAll={() => handleChangeMenu('library')}
-        />
-      )}
-      
-      {view === 'library' && (
-        <LibraryView 
-          courses={filteredCourses}
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-          onOpenCourse={handleOpenCourse}
-          onRenameCourse={openRenameModal}
-          onDeleteCourse={openDeleteModal}
-        />
-      )}
+      <ErrorBoundary>
+        <Suspense fallback={<PageLoader />}>
+          {view === 'dashboard' && (
+            <DashboardView
+              courses={filteredCourses}
+              lastPlayedCourse={lastPlayedCourse}
+              onOpenCourse={handleOpenCourse}
+              onCreateCourse={handleCreateCourse}
+              onRenameCourse={openRenameModal}
+              onDeleteCourse={openDeleteModal}
+              onSeeAll={() => handleChangeMenu('library')}
+            />
+          )}
+          
+          {view === 'library' && (
+            <LibraryView 
+              courses={filteredCourses}
+              searchQuery={searchQuery}
+              setSearchQuery={setSearchQuery}
+              onOpenCourse={handleOpenCourse}
+              onRenameCourse={openRenameModal}
+              onDeleteCourse={openDeleteModal}
+            />
+          )}
 
-      {view === 'settings' && (
-        <SettingsView
-          appPath={appPath}
-          onOpenDataFolder={handleOpenDataFolder}
-          onResetApp={handleResetApp}
-          onBack={handleBackToDashboard}
-        />
-      )}
-      
-      {view === 'player' && selectedCourse && (
-        <CoursePlayer 
-          course={selectedCourse} 
-          onBack={handleBackToDashboard}
-          isSidebarCollapsed={isSidebarCollapsed}
-          toggleSidebar={() => setIsSidebarCollapsed(!isSidebarCollapsed)} 
-        />
-      )}
+          {view === 'music' && (
+            <MusicView />
+          )}
 
-      {/* Tampilan Baru: Quick Player */}
-      {view === 'quickplay' && quickFilePath && (
-        <QuickPlayerView 
-           filePath={quickFilePath}
-           onBack={handleBackToDashboard}
-        />
-      )}
+          {view === 'settings' && (
+            <SettingsView
+              appPath={appPath}
+              onOpenDataFolder={handleOpenDataFolder}
+              onResetApp={handleResetApp}
+              onBack={handleBackToDashboard}
+            />
+          )}
+          
+          {view === 'player' && selectedCourse && (
+            <CoursePlayer 
+              course={selectedCourse} 
+              onBack={handleBackToDashboard}
+              isSidebarCollapsed={isSidebarCollapsed}
+              toggleSidebar={() => setIsSidebarCollapsed(!isSidebarCollapsed)} 
+              isMiniMode={isMiniMode}
+              onToggleMiniMode={handleToggleMiniPlayer}
+            />
+          )}
+
+          {view === 'quickplay' && quickFilePath && (
+            <QuickPlayerView 
+              filePath={quickFilePath}
+              onBack={handleBackToDashboard}
+            />
+          )}
+        </Suspense>
+      </ErrorBoundary>
 
       <ActionModal 
         isOpen={modalConfig.isOpen}

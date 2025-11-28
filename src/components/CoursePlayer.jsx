@@ -8,7 +8,14 @@ import TabsSection from './player/TabsSection';
 import PlaylistSidebar from './player/PlaylistSidebar';
 import DownloadModal from './modals/DownloadModal';
 
-const CoursePlayer = ({ course, onBack, isSidebarCollapsed, toggleSidebar }) => {
+const CoursePlayer = ({ 
+  course, 
+  onBack, 
+  isSidebarCollapsed, 
+  toggleSidebar, 
+  isMiniMode, 
+  onToggleMiniMode 
+}) => {
   const { state, actions } = useCoursePlayer(course);
   const playerRef = useRef(null);
 
@@ -42,8 +49,46 @@ const CoursePlayer = ({ course, onBack, isSidebarCollapsed, toggleSidebar }) => 
     ? (state.watchedVideos[state.currentVideo.id].currentTime || 0) 
     : 0;
 
+  // --- TAMPILAN MINI MODE ---
+  if (isMiniMode) {
+    return (
+      <div className="w-full h-full bg-black group relative">
+        <VideoSection 
+            ref={playerRef}
+            currentVideo={state.currentVideo}
+            subtitleUrl={state.subtitleUrl}
+            onEnded={() => actions.toggleWatched(state.currentVideo.id)}
+            playbackSpeed={state.playbackSpeed}
+            onSpeedChange={actions.setPlaybackSpeed}
+            isSidebarCollapsed={true}
+            toggleSidebar={() => {}}
+            subSettings={state.subSettings}
+            setSubSettings={actions.setSubSettings}
+            subtitleTracks={state.subtitleTracks}
+            selectedTrackIndex={state.selectedTrackIndex}
+            onTrackChange={actions.handleTrackChange}
+            isExtractingSub={state.isExtractingSub}
+            isCloudFile={state.currentVideo?.isCloud}
+            isDownloaded={state.currentVideo?.isDownloaded}
+            onDownloadLocal={handleDownloadClick}
+            startTime={startTime}
+            onTimeUpdate={actions.handleTimeUpdate}
+            isMiniMode={true} 
+            onToggleMiniMode={onToggleMiniMode}
+          />
+          <button 
+            onClick={onToggleMiniMode} 
+            className="absolute top-2 right-2 bg-black/50 text-white p-1 rounded opacity-0 group-hover:opacity-100 transition-opacity z-50 text-xs"
+          >
+            Expand
+          </button>
+      </div>
+    );
+  }
+
+  // --- TAMPILAN NORMAL ---
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full overflow-hidden p-1">
       <PlayerHeader 
         course={course} 
         onBack={onBack}
@@ -51,7 +96,7 @@ const CoursePlayer = ({ course, onBack, isSidebarCollapsed, toggleSidebar }) => 
         totalVideos={state.videos.length}
       />
 
-      <div className="flex flex-col lg:flex-row flex-1 gap-6 overflow-hidden">
+      <div className="flex flex-col lg:flex-row flex-1 gap-4 overflow-hidden mt-2 h-full">
         <div className={`flex flex-col overflow-hidden gap-4 transition-all duration-300 ${isSidebarCollapsed ? 'flex-[4]' : 'flex-[3]'}`}>
           <VideoSection 
             ref={playerRef}
@@ -73,6 +118,7 @@ const CoursePlayer = ({ course, onBack, isSidebarCollapsed, toggleSidebar }) => 
             onDownloadLocal={handleDownloadClick}
             startTime={startTime}
             onTimeUpdate={actions.handleTimeUpdate}
+            onToggleMiniMode={onToggleMiniMode}
           />
 
           <TabsSection 
@@ -88,6 +134,7 @@ const CoursePlayer = ({ course, onBack, isSidebarCollapsed, toggleSidebar }) => 
           />
         </div>
 
+        {/* CONTAINER SIDEBAR HARUS MEMILIKI TINGGI */}
         <div className="flex-1 min-w-[300px] flex flex-col overflow-hidden h-full">
            <PlaylistSidebar 
             videos={state.videos}

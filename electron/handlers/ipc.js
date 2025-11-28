@@ -9,11 +9,15 @@ const {
   addCourse, getCourses, updateVideoData, getVideoData, 
   addVideoAttachment, removeVideoAttachment, updateLastPlayed, 
   resetDatabase, getSettings, saveSettings,
-  deleteCourse, renameCourse
+  deleteCourse, renameCourse,
+  getPlaylists, createPlaylist, deletePlaylist, addSongToPlaylist, removeSongFromPlaylist,
+  getLikedSongs, toggleLikeSong, getRecentlyPlayed, addToRecentlyPlayed
 } = require('../db');
-const { scanDirectory } = require('../utils');
+const { scanDirectory, scanMusicDirectory } = require('../utils');
 
 function setupIPC(mainWindow) {
+  let originalBounds = null;
+
   ipcMain.handle('delete-course', (event, courseId) => deleteCourse(courseId));
   ipcMain.handle('rename-course', (event, data) => renameCourse(data.courseId, data.newTitle));
   ipcMain.handle('check-file-exists', async (event, filePath) => fs.existsSync(filePath));
@@ -123,21 +127,17 @@ function setupIPC(mainWindow) {
     try {
       const targetDir = path.dirname(destinationPath);
       if (!fs.existsSync(targetDir)) fs.mkdirSync(targetDir, { recursive: true });
-
       const stat = fs.statSync(sourcePath);
       const fileSize = stat.size;
       let copiedSize = 0;
       let startTime = Date.now();
-
       const readStream = fs.createReadStream(sourcePath);
       const writeStream = fs.createWriteStream(destinationPath);
-
       readStream.on('data', (chunk) => {
         copiedSize += chunk.length;
         const percent = Math.round((copiedSize / fileSize) * 100);
         const elapsedTime = (Date.now() - startTime) / 1000;
         const speed = (copiedSize / 1024 / 1024) / elapsedTime;
-
         mainWindow.webContents.send('download-progress', {
           percent,
           speed: speed.toFixed(1) + ' MB/s',
@@ -145,7 +145,6 @@ function setupIPC(mainWindow) {
           total: (fileSize / 1024 / 1024).toFixed(1) + ' MB'
         });
       });
-
       return new Promise((resolve, reject) => {
         writeStream.on('finish', () => resolve(true));
         writeStream.on('error', (err) => reject(err));
@@ -156,12 +155,119 @@ function setupIPC(mainWindow) {
 
   ipcMain.handle('open-external', async (event, url) => {
     if (!url) return false;
-    try {
-      await shell.openExternal(url);
-      return true;
-    } catch (e) {
-      return false;
+    try { await shell.openExternal(url); return true; } catch (e) { return false; }
+  });
+
+  ipcMain.handle('select-music-folder', async () => {
+    const result = await dialog.showOpenDialog({ properties: ['openDirectory'] });
+    if (result.canceled) return null;
+    const folderPath = result.filePaths[0];
+    const settings = getSettings();
+    settings.musicPath = folderPath;
+    saveSettings(settings);
+    return folderPath;
+  });
+
+  ipcMain.handle('import-playlist-from-folder', async () => {
+    const result = await dialog.showOpenDialog({ properties: ['openDirectory'] });
+    if (result.canceled) return null;
+    
+    const folderPath = result.filePaths[0];
+    const folderName = path.basename(folderPath);
+    
+    const mm = await import('music-metadata');
+    const files = scanMusicDirectory(folderPath);
+    
+    const songs = await Promise.all(files.map(async (file) => {
+        try {
+            const metadata = await mm.parseFile(file.path, { skipCovers: true });
+            return {
+                ...file,
+                id: Math.random().toString(36).substr(2, 9),
+                title: metadata.common.title || file.name,
+                artist: metadata.common.artist || 'Unknown Artist',
+                album: metadata.common.album || 'Unknown Album',
+                duration: metadata.format.duration || 0,
+            };
+        } catch (e) {
+            return {
+                 ...file,
+                 id: Math.random().toString(36).substr(2, 9),
+                 title: file.name,
+                 artist: 'Unknown',
+                 album: 'Unknown',
+                 duration: 0
+            };
+        }
+    }));
+
+    if (songs.length === 0) return null;
+
+    createPlaylist(folderName, songs);
+    return getPlaylists();
+  });
+
+  ipcMain.handle('get-music-path', () => {
+    const settings = getSettings();
+    return settings.musicPath || null;
+  });
+
+  ipcMain.handle('scan-music-library', async () => {
+    const settings = getSettings();
+    if (!settings.musicPath) return [];
+    const mm = await import('music-metadata');
+    const files = scanMusicDirectory(settings.musicPath);
+    const detailedFiles = await Promise.all(files.map(async (file) => {
+        try {
+            const metadata = await mm.parseFile(file.path, { skipCovers: true }); 
+            return {
+                ...file,
+                id: Math.random().toString(36).substr(2, 9),
+                title: metadata.common.title || file.name,
+                artist: metadata.common.artist || 'Unknown Artist',
+                album: metadata.common.album || 'Unknown Album',
+                duration: metadata.format.duration || 0,
+            };
+        } catch (e) {
+            return {
+                 ...file,
+                 id: Math.random().toString(36).substr(2, 9),
+                 title: file.name,
+                 artist: 'Unknown',
+                 album: 'Unknown',
+                 duration: 0
+            };
+        }
+    }));
+    return detailedFiles;
+  });
+
+  ipcMain.handle('get-playlists', () => getPlaylists());
+  ipcMain.handle('create-playlist', (event, name) => createPlaylist(name));
+  ipcMain.handle('delete-playlist', (event, id) => deletePlaylist(id));
+  ipcMain.handle('add-song-to-playlist', (event, { playlistId, song }) => addSongToPlaylist(playlistId, song));
+  ipcMain.handle('remove-song-from-playlist', (event, { playlistId, songPath }) => removeSongFromPlaylist(playlistId, songPath));
+  
+  ipcMain.handle('get-liked-songs', () => getLikedSongs());
+  ipcMain.handle('toggle-like-song', (event, song) => toggleLikeSong(song));
+  ipcMain.handle('get-recently-played', () => getRecentlyPlayed());
+  ipcMain.handle('add-to-recently-played', (event, song) => addToRecentlyPlayed(song));
+
+  ipcMain.handle('toggle-mini-player', (event, isMini) => {
+    if (isMini) {
+      originalBounds = mainWindow.getBounds();
+      mainWindow.setSize(480, 270); 
+      mainWindow.setAlwaysOnTop(true, 'screen-saver'); 
+    } else {
+      if (originalBounds) {
+        mainWindow.setBounds(originalBounds);
+      } else {
+        mainWindow.setSize(1200, 800);
+        mainWindow.center();
+      }
+      mainWindow.setAlwaysOnTop(false);
     }
+    return true;
   });
 
   ipcMain.on('window-min', () => mainWindow.minimize());

@@ -10,7 +10,8 @@ import {
   PlayCircle,
   ChevronLeft,
   ChevronRight,
-  ExternalLink
+  ExternalLink,
+  Music
 } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import { motion } from 'framer-motion';
@@ -30,6 +31,7 @@ const Sidebar = ({
   const menuItems = [
     { id: 'dashboard', icon: LayoutGrid, label: t('menu.dashboard') },
     { id: 'library', icon: Library, label: t('menu.library') },
+    { id: 'music', icon: Music, label: 'Music Player' },
     { id: 'settings', icon: Settings, label: t('menu.settings') }
   ];
 
@@ -44,181 +46,126 @@ const Sidebar = ({
     }
   };
 
-  const handleToggleCollapse = () => {
-    if (onToggleCollapse) onToggleCollapse();
-  };
-
   return (
-    <div
-      className={`h-full flex flex-col bg-light-card/90 dark:bg-dark-card/90 backdrop-blur-xl border-r border-light-border dark:border-dark-border transition-all duration-300 ease-in-out no-drag shadow-2xl shadow-black/5 ${
-        isCollapsed ? 'w-20' : 'w-72'
-      }`}
-    >
-      {/* Header Logo */}
-      <div className="relative shrink-0">
-        <div className={`p-6 flex items-center ${isCollapsed ? 'justify-center px-2' : 'gap-3'}`}>
-          <div className="relative w-10 h-10 flex-shrink-0 flex items-center justify-center bg-white dark:bg-zinc-800 rounded-xl shadow-sm border border-slate-100 dark:border-zinc-700 overflow-hidden transition-transform duration-300 hover:scale-105">
-            <img src="logo.png" alt="Logo" className="w-full h-full object-contain p-1" />
+    <div className="h-full flex flex-col">
+      <div className="relative shrink-0 p-6 flex items-center justify-between">
+        <div className={`flex items-center gap-4 transition-all duration-300 ${isCollapsed ? 'justify-center w-full' : ''}`}>
+          <div className="relative w-10 h-10 flex-shrink-0 flex items-center justify-center bg-gradient-to-tr from-day-accent to-purple-500 rounded-xl shadow-lg shadow-indigo-500/30 text-white font-bold text-xl overflow-hidden">
+            <img src="logo.png" alt="LCP" className="w-full h-full object-cover opacity-90" onError={(e) => e.target.style.display='none'} />
+            <span className="absolute">L</span>
           </div>
+          
           {!isCollapsed && (
-            <div className="min-w-0 overflow-hidden whitespace-nowrap animate-in fade-in slide-in-from-left-2 duration-300">
-              <h1 className="text-lg font-bold tracking-tight text-slate-900 dark:text-white">LCP Media</h1>
-              <p className="text-[10px] opacity-60 font-medium text-slate-500 dark:text-slate-400">{t('menu.version')}</p>
+            <div className="min-w-0 overflow-hidden">
+              <h1 className="text-lg font-bold tracking-tight leading-none bg-gradient-to-r from-slate-800 to-slate-500 dark:from-white dark:to-slate-400 bg-clip-text text-transparent">
+                LCP Media
+              </h1>
+              <p className="text-[10px] font-medium text-day-accent dark:text-night-accent tracking-wide mt-0.5">
+                v0.5.0 Alpha
+              </p>
             </div>
           )}
         </div>
-        <button
-          onClick={handleToggleCollapse}
-          className="absolute -right-3 top-1/2 -translate-y-1/2 bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 p-1 rounded-full shadow-md text-slate-500 dark:text-slate-400 hover:text-orange-500 z-50 cursor-pointer transition-transform hover:scale-110"
-        >
-          {isCollapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
-        </button>
       </div>
 
-      {/* Menu Items */}
-      <div className="flex-1 px-3 space-y-6 overflow-y-auto custom-scrollbar overflow-x-hidden">
-        <div>
+      <div className="flex-1 px-4 space-y-8 overflow-y-auto custom-scrollbar">
+        <div className="space-y-1.5">
           {!isCollapsed && (
-            <h3 className="px-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3 animate-in fade-in duration-300">Menu</h3>
+            <h3 className="px-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 opacity-80">
+              Menu
+            </h3>
           )}
-          <div className="space-y-1">
-            {menuItems.map((item) => {
-              const isActive = activeMenu === item.id;
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => onChangeMenu && onChangeMenu(item.id)}
-                  className={`group relative w-full flex items-center px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 cursor-pointer text-left ${
-                    isActive
-                      ? 'bg-orange-50 dark:bg-orange-500/10 text-orange-600 dark:text-orange-400'
-                      : 'text-gray-500 dark:text-gray-400 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-orange-600 dark:hover:text-gray-100'
-                  } ${isCollapsed ? 'justify-center' : 'gap-3'}`}
-                  title={isCollapsed ? item.label : ''}
-                >
-                  {isActive && (
-                    <motion.div
-                      layoutId="sidebar-active-indicator"
-                      className={`bg-orange-500 ${
-                        isCollapsed
-                          ? 'absolute bottom-0 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full mb-1'
-                          : 'absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 rounded-r-full'
-                      }`}
-                    />
-                  )}
-                  <item.icon
-                    size={20}
-                    className={`shrink-0 ${isActive ? 'text-orange-500' : 'text-gray-400 group-hover:text-orange-500'}`}
+          {menuItems.map((item) => {
+            const isActive = activeMenu === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => onChangeMenu && onChangeMenu(item.id)}
+                className={`relative w-full flex items-center px-3 py-3 rounded-2xl text-sm font-medium transition-all duration-300 group overflow-hidden ${
+                  isActive
+                    ? 'text-white shadow-lg shadow-indigo-500/25'
+                    : 'text-slate-600 dark:text-slate-400 hover:bg-white/50 dark:hover:bg-white/5'
+                } ${isCollapsed ? 'justify-center' : 'gap-3'}`}
+              >
+                {isActive && (
+                  <motion.div
+                    layoutId="active-pill"
+                    className="absolute inset-0 bg-gradient-to-r from-day-accent to-purple-600 rounded-2xl -z-10"
+                    initial={false}
+                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
                   />
-                  {!isCollapsed && <span className="truncate">{item.label}</span>}
-                </button>
-              );
-            })}
-          </div>
+                )}
+                <item.icon
+                  size={20}
+                  className={`shrink-0 transition-transform duration-300 ${isActive ? 'scale-110' : 'group-hover:scale-110'}`}
+                />
+                {!isCollapsed && <span className="truncate">{item.label}</span>}
+              </button>
+            );
+          })}
         </div>
 
-        {/* Recent Courses */}
-        <div>
-          {!isCollapsed ? (
-            <div className="flex items-center justify-between mb-3 px-2 animate-in fade-in duration-300">
-              <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{t('menu.recent')}</h3>
-              <button className="p-1 rounded-lg hover:bg-white/40 dark:hover:bg-white/5 transition-colors">
-                <Plus size={14} className="text-gray-400" />
-              </button>
+        <div className="space-y-2">
+          {!isCollapsed && (
+            <div className="flex items-center justify-between px-2 mb-2">
+              <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest opacity-80">
+                {t('menu.recent')}
+              </h3>
             </div>
-          ) : (
-            <div className="h-px bg-slate-200 dark:bg-white/10 my-4 mx-2" />
           )}
           
-          <div className="space-y-2 px-1">
-            {recentCourses.map((course) =>
-              isCollapsed ? (
-                <button
-                  key={course.id}
-                  onClick={() => onOpenCourse && onOpenCourse(course)}
-                  className="w-full flex justify-center p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800 text-slate-400 hover:text-orange-500 transition-colors"
-                  title={course.title}
-                >
-                  <PlayCircle size={20} />
-                </button>
-              ) : (
-                <button
-                  key={course.id}
-                  onClick={() => onOpenCourse && onOpenCourse(course)}
-                  className="w-full p-3 rounded-xl bg-white/50 dark:bg-zinc-800/30 border border-slate-200/50 dark:border-white/5 flex items-center gap-3 cursor-pointer hover:border-orange-300 dark:hover:border-orange-500/50 transition-all group text-left shadow-sm hover:shadow-md"
-                >
-                  <div className="flex-1 min-w-0 grid">
-                    <p className="text-xs font-semibold text-slate-700 dark:text-slate-300 truncate group-hover:text-orange-600 dark:group-hover:text-orange-400">
-                      {course.title}
-                    </p>
-                    <p className="text-[10px] text-gray-400 truncate mt-0.5 font-medium">
-                      {course.progress ?? 0}% Completed
-                    </p>
+          {recentCourses.slice(0, 3).map((course) => (
+            <button
+              key={course.id}
+              onClick={() => onOpenCourse && onOpenCourse(course)}
+              className={`w-full p-2 rounded-2xl transition-all duration-200 group hover:bg-white/60 dark:hover:bg-white/5 ${
+                isCollapsed ? 'flex justify-center' : 'flex items-center gap-3'
+              }`}
+              title={course.title}
+            >
+              <div className="w-8 h-8 rounded-xl bg-slate-200/50 dark:bg-white/5 flex items-center justify-center shrink-0 group-hover:bg-day-accent group-hover:text-white transition-colors">
+                <PlayCircle size={16} />
+              </div>
+              {!isCollapsed && (
+                <div className="flex-1 min-w-0 text-left">
+                  <p className="text-xs font-semibold truncate text-slate-700 dark:text-slate-300 group-hover:text-day-accent dark:group-hover:text-night-accent transition-colors">
+                    {course.title}
+                  </p>
+                  <div className="w-full h-1 bg-slate-200 dark:bg-white/10 rounded-full mt-1.5 overflow-hidden">
+                    <div 
+                      className="h-full bg-day-accent dark:bg-night-accent rounded-full" 
+                      style={{ width: `${course.progress || 0}%` }} 
+                    />
                   </div>
-                  <PlayCircle size={18} className="text-slate-300 group-hover:text-orange-500 shrink-0" />
-                </button>
-              )
-            )}
-          </div>
+                </div>
+              )}
+            </button>
+          ))}
         </div>
       </div>
 
-      {/* Footer Settings */}
-      <div className="p-4 border-t border-light-border dark:border-dark-border shrink-0 bg-white/30 dark:bg-black/20 backdrop-blur-sm">
-        {!isCollapsed ? (
-          <div className="flex items-center gap-2 bg-slate-100 dark:bg-zinc-800 rounded-xl p-1 border border-slate-200 dark:border-white/5 mb-4 animate-in fade-in duration-300">
-            <button
-              onClick={() => theme === 'dark' && toggleTheme()}
-              className={`flex-1 flex items-center justify-center gap-1 text-xs font-semibold py-1.5 rounded-lg transition-all ${
-                theme === 'light' ? 'bg-white shadow-sm text-slate-900' : 'text-gray-400'
-              }`}
-            >
-              <Sun size={14} />
-              Light
-            </button>
-            <button
-              onClick={() => theme === 'light' && toggleTheme()}
-              className={`flex-1 flex items-center justify-center gap-1 text-xs font-semibold py-1.5 rounded-lg transition-all ${
-                theme === 'dark' ? 'bg-zinc-700 shadow-sm text-white' : 'text-gray-500'
-              }`}
-            >
-              <Moon size={14} />
-              Dark
-            </button>
+      <div className="p-4 mt-auto">
+        <button
+          onClick={toggleTheme}
+          className="w-full flex items-center justify-center gap-3 p-3 rounded-2xl bg-white/40 dark:bg-black/20 hover:bg-white/60 dark:hover:bg-white/10 backdrop-blur-md border border-white/20 transition-all duration-300 group"
+        >
+          <div className="relative w-5 h-5">
+             <Sun size={20} className={`absolute inset-0 transition-all duration-500 ${theme === 'dark' ? 'opacity-0 rotate-90 scale-0' : 'opacity-100 rotate-0 scale-100 text-amber-500'}`} />
+             <Moon size={20} className={`absolute inset-0 transition-all duration-500 ${theme === 'light' ? 'opacity-0 -rotate-90 scale-0' : 'opacity-100 rotate-0 scale-100 text-indigo-400'}`} />
           </div>
-        ) : (
-          <button
-            onClick={toggleTheme}
-            className="w-full flex justify-center p-2 rounded-lg bg-slate-100 dark:bg-zinc-800 hover:bg-slate-200 dark:hover:bg-zinc-700 text-slate-500 dark:text-gray-400 mb-4"
-          >
-            {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
-          </button>
-        )}
+          {!isCollapsed && (
+            <span className="text-xs font-semibold text-slate-600 dark:text-slate-300 group-hover:text-day-accent dark:group-hover:text-night-accent">
+              {theme === 'light' ? 'Light Mode' : 'Dark Mode'}
+            </span>
+          )}
+        </button>
 
-        {!isCollapsed && (
-          <div className="bg-gradient-to-r from-orange-50 via-amber-50 to-rose-50 dark:from-orange-500/10 dark:via-amber-500/10 dark:to-rose-500/10 rounded-xl p-3 border border-orange-100/70 dark:border-orange-500/25 animate-in fade-in duration-300">
-            <p className="text-[10px] font-bold text-orange-600 dark:text-orange-400 uppercase tracking-[0.18em] mb-2">
-              {t('menu.supported')}
-            </p>
-            <div className="flex items-center justify-between gap-3">
-              <div className="min-w-0">
-                <p className="text-xs font-bold text-slate-900 dark:text-white leading-tight">
-                  Officialgame.id
-                </p>
-                <p className="text-[10px] text-slate-500 dark:text-zinc-400 truncate">
-                  Dev: Syaifulloh
-                </p>
-              </div>
-              <a
-                href={storeUrl}
-                onClick={handleOpenStore}
-                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white dark:bg-zinc-900 text-[10px] font-semibold text-orange-600 dark:text-orange-300 border border-orange-200/80 dark:border-orange-500/40 hover:bg-orange-500 hover:text-white hover:border-orange-500 transition-all whitespace-nowrap shadow-sm"
-              >
-                <span>{t('menu.store')}</span>
-                <ExternalLink size={10} />
-              </a>
-            </div>
-          </div>
-        )}
+        <button
+          onClick={() => onToggleCollapse && onToggleCollapse()}
+          className="w-full flex justify-center mt-3 text-slate-400 hover:text-day-accent transition-colors"
+        >
+          {isCollapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
+        </button>
       </div>
     </div>
   );
