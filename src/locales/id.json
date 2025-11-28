@@ -1,0 +1,64 @@
+{
+  "menu": {
+    "dashboard": "Beranda",
+    "library": "Pustaka Saya",
+    "settings": "Pengaturan",
+    "recent": "Aktivitas Terakhir",
+    "store": "Kunjungi Toko",
+    "supported": "Didukung Oleh",
+    "version": "v0.3.0 Pro"
+  },
+  "dashboard": {
+    "welcome": "Beranda",
+    "subtitle": "Ringkasan aktivitas belajar Anda",
+    "continue": "Lanjutkan Belajar",
+    "resumeBtn": "Putar Kursus",
+    "import": "Impor Kursus",
+    "seeAll": "Lihat Semua",
+    "empty": "Belum ada kursus yang dibuka."
+  },
+  "library": {
+    "title": "Pustaka Saya",
+    "subtitle": "Anda memiliki {{count}} kursus dalam koleksi.",
+    "search": "Cari koleksi...",
+    "empty": "Tidak ditemukan kursus dengan kata kunci",
+    "videos": "Video",
+    "progress": "Progres"
+  },
+  "settings": {
+    "title": "Pengaturan",
+    "general": "Umum",
+    "downloads": "Unduhan",
+    "language": "Bahasa",
+    "appData": "Data Aplikasi",
+    "openFolder": "Buka Folder",
+    "danger": "Area Berbahaya",
+    "reset": "Reset Pabrik (Hapus Data)",
+    "downloadLoc": "Lokasi Penyimpanan",
+    "change": "Ubah",
+    "usedSpace": "Terpakai",
+    "files": "File Terunduh",
+    "noFiles": "Belum ada file yang diunduh."
+  },
+  "player": {
+    "notes": "Catatan Saya",
+    "files": "Berkas",
+    "linked": "Terkait Video Ini",
+    "addFile": "Tambah Berkas",
+    "generalFiles": "Berkas Kursus Umum",
+    "saved": "Tersimpan",
+    "saving": "Menyimpan...",
+    "placeholder": "Mulai ketik catatan untuk video ini di sini..."
+  },
+  "toast": {
+    "downloadStarted": "Mengunduh file...",
+    "downloadSuccess": "Unduhan selesai!",
+    "downloadFailed": "Gagal mengunduh",
+    "markedWatched": "Ditandai sudah ditonton",
+    "fileAttached": "Berkas berhasil dilampirkan",
+    "fileRemoved": "Berkas dihapus",
+    "subLoaded": "Subtitle eksternal dimuat",
+    "subExtracted": "Subtitle berhasil diekstrak",
+    "subFailed": "Gagal mengekstrak subtitle"
+  }
+}

@@ -23,9 +23,10 @@ body {
   user-select: none;
 }
 
+/* Modern Scrollbar - macOS style */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
@@ -33,12 +34,21 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(156, 163, 175, 0.3);
-  border-radius: 4px;
+  background: rgba(156, 163, 175, 0.2);
+  border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(156, 163, 175, 0.5);
+  background: rgba(156, 163, 175, 0.4);
+}
+
+/* Hide scrollbar for cleaner look where needed but allow scroll */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
 }
 
 .app-drag-region {
@@ -47,4 +57,38 @@ body {
 
 .no-drag {
   -webkit-app-region: no-drag;
+}
+input[type=range] {
+  -webkit-appearance: none; /* Hides the slider so that custom slider can be made */
+  background: transparent; /* Otherwise white in Chrome */
+}
+
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+}
+
+input[type=range]:focus {
+  outline: none; /* Removes the blue border. You should probably do some kind of focus styling for accessibility reasons though. */
+}
+
+/* Chrome/Safari/Edge Thumb */
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  height: 12px;
+  width: 12px;
+  border-radius: 50%;
+  background: #f97316; /* Orange-500 */
+  cursor: pointer;
+  margin-top: -4px; /* You need to specify a margin in Chrome, but in Firefox and IE it is automatic */
+  box-shadow: 0 0 2px rgba(0,0,0,0.5);
+}
+
+/* Firefox Thumb */
+input[type=range]::-moz-range-thumb {
+  height: 12px;
+  width: 12px;
+  border-radius: 50%;
+  background: #f97316;
+  cursor: pointer;
+  border: none;
 }

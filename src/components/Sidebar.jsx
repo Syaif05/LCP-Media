@@ -6,7 +6,6 @@ import {
   Plus,
   Sun,
   Moon,
-  Disc,
   LayoutGrid,
   PlayCircle,
   ChevronLeft,
@@ -15,6 +14,7 @@ import {
 } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 
 const Sidebar = ({
   activeMenu = 'dashboard',
@@ -25,11 +25,12 @@ const Sidebar = ({
   onToggleCollapse
 }) => {
   const { theme, toggleTheme } = useTheme();
+  const { t } = useTranslation();
 
   const menuItems = [
-    { id: 'dashboard', icon: LayoutGrid, label: 'Dashboard' },
-    { id: 'library', icon: Library, label: 'My Library' },
-    { id: 'settings', icon: Settings, label: 'Settings' }
+    { id: 'dashboard', icon: LayoutGrid, label: t('menu.dashboard') },
+    { id: 'library', icon: Library, label: t('menu.library') },
+    { id: 'settings', icon: Settings, label: t('menu.settings') }
   ];
 
   const storeUrl = 'https://shopee.co.id/officialgame.id';
@@ -49,34 +50,36 @@ const Sidebar = ({
 
   return (
     <div
-      className={`h-full flex flex-col bg-light-card dark:bg-dark-card border-r border-light-border dark:border-dark-border transition-all duration-300 no-drag shadow-xl shadow-black/5 ${
+      className={`h-full flex flex-col bg-light-card/90 dark:bg-dark-card/90 backdrop-blur-xl border-r border-light-border dark:border-dark-border transition-all duration-300 ease-in-out no-drag shadow-2xl shadow-black/5 ${
         isCollapsed ? 'w-20' : 'w-72'
       }`}
     >
+      {/* Header Logo */}
       <div className="relative shrink-0">
         <div className={`p-6 flex items-center ${isCollapsed ? 'justify-center px-2' : 'gap-3'}`}>
-          <div className="relative w-10 h-10 flex-shrink-0 flex items-center justify-center bg-white dark:bg-zinc-800 rounded-xl shadow-sm border border-slate-100 dark:border-zinc-700 overflow-hidden">
+          <div className="relative w-10 h-10 flex-shrink-0 flex items-center justify-center bg-white dark:bg-zinc-800 rounded-xl shadow-sm border border-slate-100 dark:border-zinc-700 overflow-hidden transition-transform duration-300 hover:scale-105">
             <img src="logo.png" alt="Logo" className="w-full h-full object-contain p-1" />
           </div>
           {!isCollapsed && (
-            <div className="min-w-0 overflow-hidden whitespace-nowrap">
+            <div className="min-w-0 overflow-hidden whitespace-nowrap animate-in fade-in slide-in-from-left-2 duration-300">
               <h1 className="text-lg font-bold tracking-tight text-slate-900 dark:text-white">LCP Media</h1>
-              <p className="text-[10px] opacity-60 font-medium text-slate-500 dark:text-slate-400">v0.3.0 Pro</p>
+              <p className="text-[10px] opacity-60 font-medium text-slate-500 dark:text-slate-400">{t('menu.version')}</p>
             </div>
           )}
         </div>
         <button
           onClick={handleToggleCollapse}
-          className="absolute -right-3 top-1/2 -translate-y-1/2 bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 p-1 rounded-full shadow-sm text-slate-500 dark:text-slate-400 hover:text-orange-500 z-50 cursor-pointer"
+          className="absolute -right-3 top-1/2 -translate-y-1/2 bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 p-1 rounded-full shadow-md text-slate-500 dark:text-slate-400 hover:text-orange-500 z-50 cursor-pointer transition-transform hover:scale-110"
         >
           {isCollapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
         </button>
       </div>
 
+      {/* Menu Items */}
       <div className="flex-1 px-3 space-y-6 overflow-y-auto custom-scrollbar overflow-x-hidden">
         <div>
           {!isCollapsed && (
-            <h3 className="px-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">Menu</h3>
+            <h3 className="px-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3 animate-in fade-in duration-300">Menu</h3>
           )}
           <div className="space-y-1">
             {menuItems.map((item) => {
@@ -88,7 +91,7 @@ const Sidebar = ({
                   className={`group relative w-full flex items-center px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 cursor-pointer text-left ${
                     isActive
                       ? 'bg-orange-50 dark:bg-orange-500/10 text-orange-600 dark:text-orange-400'
-                      : 'text-gray-500 dark:text-gray-400 hover:bg-orange-50 dark:hover:bg-white/5 hover:text-orange-600 dark:hover:text-gray-100'
+                      : 'text-gray-500 dark:text-gray-400 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-orange-600 dark:hover:text-gray-100'
                   } ${isCollapsed ? 'justify-center' : 'gap-3'}`}
                   title={isCollapsed ? item.label : ''}
                 >
@@ -97,7 +100,7 @@ const Sidebar = ({
                       layoutId="sidebar-active-indicator"
                       className={`bg-orange-500 ${
                         isCollapsed
-                          ? 'absolute bottom-0 left-2 right-2 h-1 rounded-full'
+                          ? 'absolute bottom-0 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full mb-1'
                           : 'absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 rounded-r-full'
                       }`}
                     />
@@ -113,10 +116,11 @@ const Sidebar = ({
           </div>
         </div>
 
+        {/* Recent Courses */}
         <div>
           {!isCollapsed ? (
-            <div className="flex items-center justify-between mb-3 px-2">
-              <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Recent</h3>
+            <div className="flex items-center justify-between mb-3 px-2 animate-in fade-in duration-300">
+              <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{t('menu.recent')}</h3>
               <button className="p-1 rounded-lg hover:bg-white/40 dark:hover:bg-white/5 transition-colors">
                 <Plus size={14} className="text-gray-400" />
               </button>
@@ -140,10 +144,10 @@ const Sidebar = ({
                 <button
                   key={course.id}
                   onClick={() => onOpenCourse && onOpenCourse(course)}
-                  className="w-full p-3 rounded-xl bg-slate-50 dark:bg-zinc-800/50 border border-slate-200 dark:border-zinc-700/50 flex items-center gap-3 cursor-pointer hover:border-orange-300 dark:hover:border-orange-500/50 transition-all group text-left shadow-sm hover:shadow-md"
+                  className="w-full p-3 rounded-xl bg-white/50 dark:bg-zinc-800/30 border border-slate-200/50 dark:border-white/5 flex items-center gap-3 cursor-pointer hover:border-orange-300 dark:hover:border-orange-500/50 transition-all group text-left shadow-sm hover:shadow-md"
                 >
                   <div className="flex-1 min-w-0 grid">
-                    <p className="text-xs font-semibold text-slate-800 dark:text-slate-200 truncate group-hover:text-orange-600 dark:group-hover:text-orange-400">
+                    <p className="text-xs font-semibold text-slate-700 dark:text-slate-300 truncate group-hover:text-orange-600 dark:group-hover:text-orange-400">
                       {course.title}
                     </p>
                     <p className="text-[10px] text-gray-400 truncate mt-0.5 font-medium">
@@ -158,9 +162,10 @@ const Sidebar = ({
         </div>
       </div>
 
-      <div className="p-4 border-t border-light-border dark:border-dark-border shrink-0">
+      {/* Footer Settings */}
+      <div className="p-4 border-t border-light-border dark:border-dark-border shrink-0 bg-white/30 dark:bg-black/20 backdrop-blur-sm">
         {!isCollapsed ? (
-          <div className="flex items-center gap-2 bg-slate-100 dark:bg-zinc-800 rounded-xl p-1 border border-slate-200 dark:border-white/5 mb-4">
+          <div className="flex items-center gap-2 bg-slate-100 dark:bg-zinc-800 rounded-xl p-1 border border-slate-200 dark:border-white/5 mb-4 animate-in fade-in duration-300">
             <button
               onClick={() => theme === 'dark' && toggleTheme()}
               className={`flex-1 flex items-center justify-center gap-1 text-xs font-semibold py-1.5 rounded-lg transition-all ${
@@ -190,9 +195,9 @@ const Sidebar = ({
         )}
 
         {!isCollapsed && (
-          <div className="bg-gradient-to-r from-orange-50 via-amber-50 to-rose-50 dark:from-orange-500/10 dark:via-amber-500/10 dark:to-rose-500/10 rounded-xl p-3 border border-orange-100/70 dark:border-orange-500/25">
+          <div className="bg-gradient-to-r from-orange-50 via-amber-50 to-rose-50 dark:from-orange-500/10 dark:via-amber-500/10 dark:to-rose-500/10 rounded-xl p-3 border border-orange-100/70 dark:border-orange-500/25 animate-in fade-in duration-300">
             <p className="text-[10px] font-bold text-orange-600 dark:text-orange-400 uppercase tracking-[0.18em] mb-2">
-              Supported By
+              {t('menu.supported')}
             </p>
             <div className="flex items-center justify-between gap-3">
               <div className="min-w-0">
@@ -206,9 +211,9 @@ const Sidebar = ({
               <a
                 href={storeUrl}
                 onClick={handleOpenStore}
-                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white dark:bg-zinc-900 text-[10px] font-semibold text-orange-600 dark:text-orange-300 border border-orange-200/80 dark:border-orange-500/40 hover:bg-orange-500 hover:text-white hover:border-orange-500 transition-colors whitespace-nowrap"
+                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white dark:bg-zinc-900 text-[10px] font-semibold text-orange-600 dark:text-orange-300 border border-orange-200/80 dark:border-orange-500/40 hover:bg-orange-500 hover:text-white hover:border-orange-500 transition-all whitespace-nowrap shadow-sm"
               >
-                <span>Visit</span>
+                <span>{t('menu.store')}</span>
                 <ExternalLink size={10} />
               </a>
             </div>

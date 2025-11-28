@@ -2,7 +2,8 @@
 import React from 'react';
 import { Play, FolderOpen, Clock, Layout, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
-import CourseCard from './CourseCard'; // Import Card Baru
+import { useTranslation } from 'react-i18next';
+import CourseCard from './CourseCard';
 
 const DashboardView = ({ 
   courses, 
@@ -11,24 +12,21 @@ const DashboardView = ({
   onCreateCourse,
   onRenameCourse,
   onDeleteCourse,
-  onSeeAll // Fungsi untuk pindah ke tab Library
+  onSeeAll 
 }) => {
-  
-  // LIMIT 6 KURSUS UNTUK DASHBOARD
+  const { t } = useTranslation();
   const dashboardCourses = courses.slice(0, 5);
 
   return (
     <div className="space-y-8 fade-in pb-10">
       
-      {/* Header Sederhana */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Dashboard</h1>
-          <p className="text-sm text-slate-500 dark:text-zinc-400 font-medium">Your learning activity overview</p>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">{t('dashboard.welcome')}</h1>
+          <p className="text-sm text-slate-500 dark:text-zinc-400 font-medium">{t('dashboard.subtitle')}</p>
         </div>
       </div>
 
-      {/* HERO SECTION (Last Played) */}
       {lastPlayedCourse && (
         <motion.div 
           initial={{ y: 20, opacity: 0 }}
@@ -40,12 +38,12 @@ const DashboardView = ({
           <div className="relative z-10 p-8 md:p-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
             <div className="max-w-xl">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-500/10 border border-orange-500/20 text-orange-400 text-[10px] font-bold uppercase tracking-widest mb-4">
-                <Clock size={12} /> Continue Learning
+                <Clock size={12} /> {t('dashboard.continue')}
               </div>
               <h2 className="text-3xl font-bold mb-3 leading-tight tracking-tight text-white">{lastPlayedCourse.title}</h2>
               <p className="text-zinc-400 text-sm mb-8 font-medium line-clamp-1 opacity-80">{lastPlayedCourse.path}</p>
               <button className="flex items-center gap-3 bg-white text-black px-6 py-3.5 rounded-xl font-bold hover:scale-105 transition-transform shadow-glow">
-                <Play size={18} fill="currentColor" /> Resume Course
+                <Play size={18} fill="currentColor" /> {t('dashboard.resumeBtn')}
               </button>
             </div>
             <div className="relative w-32 h-32 flex items-center justify-center flex-shrink-0">
@@ -59,20 +57,18 @@ const DashboardView = ({
         </motion.div>
       )}
 
-      {/* RECENT COURSES GRID */}
       <div>
         <div className="flex items-center justify-between mb-5">
           <h3 className="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
             <Layout size={20} className="text-orange-500"/>
-            Recent Activity
+            {t('menu.recent')}
           </h3>
           <button onClick={onSeeAll} className="text-sm font-semibold text-orange-600 dark:text-orange-400 hover:underline flex items-center gap-1">
-            See All Library <ArrowRight size={14} />
+            {t('dashboard.seeAll')} <ArrowRight size={14} />
           </button>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {/* Import Button */}
             <button 
               onClick={onCreateCourse}
               className="h-full min-h-[200px] rounded-2xl border-2 border-dashed border-slate-300 dark:border-zinc-700 hover:border-orange-500 hover:bg-orange-50/50 dark:hover:bg-orange-900/10 transition-all flex flex-col items-center justify-center gap-3 text-slate-400 hover:text-orange-500 group"
@@ -80,10 +76,9 @@ const DashboardView = ({
               <div className="p-4 bg-slate-100 dark:bg-zinc-800 rounded-full group-hover:scale-110 transition-transform shadow-sm">
                 <FolderOpen size={24} />
               </div>
-              <span className="font-semibold text-sm">Import Course</span>
+              <span className="font-semibold text-sm">{t('dashboard.import')}</span>
             </button>
 
-            {/* List 6 Kursus */}
             {dashboardCourses.map((course) => (
               <CourseCard 
                 key={course.id}

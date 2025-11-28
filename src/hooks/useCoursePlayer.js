@@ -1,7 +1,11 @@
 // src/hooks/useCoursePlayer.js
 import { useState, useEffect, useRef } from 'react';
+import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 
 const useCoursePlayer = (course) => {
+  const { t } = useTranslation();
+  
   const [videos, setVideos] = useState([]);
   const [resources, setResources] = useState([]);
   const [currentVideo, setCurrentVideo] = useState(null);
@@ -31,6 +35,7 @@ const useCoursePlayer = (course) => {
   const [downloadSettings, setDownloadSettings] = useState(null);
 
   const timeoutRef = useRef(null); 
+  const timeSaveRef = useRef(null);
 
   useEffect(() => {
     window.electron.getSettings().then(setDownloadSettings);
@@ -48,7 +53,7 @@ const useCoursePlayer = (course) => {
   useEffect(() => {
     const initVideo = async () => {
       if (currentVideo) {
-        const data = watchedVideos[currentVideo.id] || { note: '', attachments: [] };
+        const data = watchedVideos[currentVideo.id] || { note: '', attachments: [], currentTime: 0 };
         setCurrentNote(data.note || '');
         setVideoAttachments(data.attachments || []);
         
@@ -151,15 +156,25 @@ const useCoursePlayer = (course) => {
 
     if (track.type === 'external') {
       loadSubtitleBlob(track.content);
+      toast.success(t('toast.subLoaded'));
     } else {
       setIsExtractingSub(true);
+      const loadingToast = toast.loading("Extracting subtitle...");
       try {
         const vttData = await window.electron.extractEmbeddedSubtitle({
           videoPath: currentVideo.path,
           streamIndex: track.index
         });
-        if (vttData) loadSubtitleBlob(vttData);
+        if (vttData) {
+          loadSubtitleBlob(vttData);
+          toast.success(t('toast.subExtracted'));
+        } else {
+          toast.error(t('toast.subFailed'));
+        }
+      } catch (err) {
+        toast.error(t('toast.subFailed'));
       } finally {
+        toast.dismiss(loadingToast);
         setIsExtractingSub(false);
       }
     }
@@ -173,13 +188,16 @@ const useCoursePlayer = (course) => {
       setDownloadProgress(progressData);
     });
 
+    toast.info(t('toast.downloadStarted'));
+
     try {
       const sourcePath = currentVideo.originalPath || currentVideo.path;
       await window.electron.startDownload({ sourcePath, destinationPath: targetPath });
       await loadVideos(); 
+      toast.success(t('toast.downloadSuccess'));
     } catch (e) {
       console.error(e);
-      alert("Download Failed");
+      toast.error(t('toast.downloadFailed'));
     } finally {
       setIsDownloading(false);
       removeListener();
@@ -195,6 +213,7 @@ const useCoursePlayer = (course) => {
     const newStatus = !watchedVideos[videoId]?.watched;
     setWatchedVideos(prev => ({ ...prev, [videoId]: { ...prev[videoId], watched: newStatus } }));
     await window.electron.toggleVideoStatus({ coursePath: course.path, videoId, status: newStatus });
+    if(newStatus) toast.success(t('toast.markedWatched'));
   };
 
   const handleNoteChange = (e) => {
@@ -209,11 +228,23 @@ const useCoursePlayer = (course) => {
     }, 1000); 
   };
 
+  const handleTimeUpdate = (currentTime) => {
+    if (timeSaveRef.current) clearTimeout(timeSaveRef.current);
+    timeSaveRef.current = setTimeout(async () => {
+      await window.electron.saveVideoTime({ 
+        coursePath: course.path, 
+        videoId: currentVideo.id, 
+        time: currentTime 
+      });
+    }, 2000); 
+  };
+
   const handleAddAttachment = async () => {
     const newAttachments = await window.electron.addVideoAttachment({ coursePath: course.path, videoId: currentVideo.id });
     if (newAttachments) {
       setVideoAttachments(newAttachments);
       setWatchedVideos(prev => ({ ...prev, [currentVideo.id]: { ...prev[currentVideo.id], attachments: newAttachments } }));
+      toast.success(t('toast.fileAttached'));
     }
   };
 
@@ -221,6 +252,7 @@ const useCoursePlayer = (course) => {
     const newAttachments = await window.electron.removeVideoAttachment({ coursePath: course.path, videoId: currentVideo.id, filePath });
     setVideoAttachments(newAttachments);
     setWatchedVideos(prev => ({ ...prev, [currentVideo.id]: { ...prev[currentVideo.id], attachments: newAttachments } }));
+    toast.success(t('toast.fileRemoved'));
   };
 
   return {
@@ -234,7 +266,7 @@ const useCoursePlayer = (course) => {
       setPlaybackSpeed, setSubSettings, setActiveTab, setCurrentNote,
       setShowDownloadModal, setDownloadProgress, setIsDownloading,
       handleVideoChange, toggleWatched, handleNoteChange, handleAddAttachment,
-      handleRemoveAttachment, handleTrackChange, confirmDownload
+      handleRemoveAttachment, handleTrackChange, confirmDownload, handleTimeUpdate
     }
   };
 };

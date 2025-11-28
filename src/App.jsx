@@ -1,16 +1,20 @@
 // src/App.jsx
 import React, { useState, useEffect } from 'react';
+import { Toaster } from 'sonner';
 import MainLayout from './layouts/MainLayout';
 import CoursePlayer from './components/CoursePlayer';
 import DashboardView from './components/views/DashboardView';
 import SettingsView from './components/views/SettingsView';
 import LibraryView from './components/views/LibraryView';
+import QuickPlayerView from './components/views/QuickPlayerView'; // Import Baru
 import ActionModal from './components/modals/ActionModal';
 
 function App() {
   const [courses, setCourses] = useState([]);
   const [view, setView] = useState('dashboard');
   const [selectedCourse, setSelectedCourse] = useState(null);
+  const [quickFilePath, setQuickFilePath] = useState(null); // State baru untuk quick play
+  
   const [searchQuery, setSearchQuery] = useState('');
   const [activeMenu, setActiveMenu] = useState('dashboard');
   const [appPath, setAppPath] = useState('');
@@ -30,6 +34,15 @@ function App() {
 
   useEffect(() => {
     loadCourses();
+    
+    // Listener untuk Open With (File Association)
+    if (window.electron && window.electron.onOpenFileDirect) {
+      window.electron.onOpenFileDirect((filePath) => {
+        setQuickFilePath(filePath);
+        setView('quickplay');
+        setIsSidebarCollapsed(true); // Auto collapse sidebar biar fokus
+      });
+    }
   }, []);
 
   const filteredCourses = courses.filter(course =>
@@ -60,6 +73,7 @@ function App() {
 
   const handleBackToDashboard = () => {
     setSelectedCourse(null);
+    setQuickFilePath(null);
     setView('dashboard');
     setActiveMenu('dashboard');
     setIsSidebarCollapsed(false);
@@ -132,6 +146,8 @@ function App() {
       isSidebarCollapsed={isSidebarCollapsed}
       toggleSidebar={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
     >
+      <Toaster position="bottom-right" theme="system" richColors closeButton />
+      
       {view === 'dashboard' && (
         <DashboardView
           courses={filteredCourses}
@@ -170,6 +186,14 @@ function App() {
           onBack={handleBackToDashboard}
           isSidebarCollapsed={isSidebarCollapsed}
           toggleSidebar={() => setIsSidebarCollapsed(!isSidebarCollapsed)} 
+        />
+      )}
+
+      {/* Tampilan Baru: Quick Player */}
+      {view === 'quickplay' && quickFilePath && (
+        <QuickPlayerView 
+           filePath={quickFilePath}
+           onBack={handleBackToDashboard}
         />
       )}
 

@@ -131,3 +131,100 @@ Untuk membuat file installer .exe yang siap didistribusikan:
 1. Pastikan package.json memiliki konfigurasi build yang benar (termasuk icon).  
 2. Jalankan:  
    npm run electron:build  
+
+# LCP Media (Local Course Player) 🎥
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Electron](https://img.shields.io/badge/Electron-29.0-blue)](https://www.electronjs.org/)
+[![React](https://img.shields.io/badge/React-18.0-blue)](https://reactjs.org/)
+
+**LCP Media** adalah aplikasi desktop modern yang dirancang khusus untuk mengelola dan memutar video kursus pembelajaran lokal secara offline. Dibangun dengan **Electron** dan **React**, aplikasi ini menawarkan pengalaman belajar yang fokus, terorganisir, dan bebas gangguan.
+
+---
+
+## ✨ Fitur Utama
+
+* **📚 Manajemen Pustaka Cerdas:** Secara otomatis memindai folder dan menyusun video berdasarkan urutan numerik yang benar.
+* **⏯️ Smart Resume:** Melanjutkan video tepat di detik terakhir Anda menonton.
+* **📝 Catatan Terintegrasi:** Tulis catatan (notes) untuk setiap video dan simpan secara otomatis.
+* **📂 File Attachment:** Hubungkan file pendukung (PDF, materi, kode) ke video tertentu agar mudah diakses.
+* **🌐 Multi-Bahasa:** Mendukung Bahasa Indonesia dan Inggris.
+* **🚀 Quick Play Mode:** Jadikan sebagai default player! Klik kanan file video di Windows Explorer -> "Open With LCP Media".
+* **🌙 Dark Mode:** Tampilan antarmuka modern dengan dukungan tema gelap dan terang.
+* **⚡ Performa Tinggi:** Menggunakan Virtual Scrolling untuk menangani ratusan video tanpa lag.
+* **☁️ Hybrid Cloud/Local:** (Eksperimental) Mendukung pemutaran dari path Google Drive Desktop.
+
+---
+
+## 🛠️ Teknologi
+
+* **Frontend:** React, Vite, Tailwind CSS, Framer Motion, Sonner (Toast), Lucide Icons.
+* **Backend:** Electron (Main/Renderer Process), Fluent-FFmpeg (untuk ekstraksi subtitle).
+* **Storage:** LowDB (JSON Database lokal).
+
+---
+
+## 📦 Instalasi (Pengguna)
+
+1.  Unduh file installer terbaru (`.exe`) dari halaman [Releases](https://github.com/Syaif05/LCP-Media/releases).
+2.  Jalankan installer.
+3.  Aplikasi siap digunakan!
+
+---
+
+## 💻 Pengembangan (Developer)
+
+Jika Anda ingin berkontribusi atau memodifikasi kode sumber:
+
+### Prasyarat
+* Node.js (v16 atau lebih baru)
+* NPM atau Yarn
+
+### Langkah-langkah
+
+1.  **Clone Repository**
+    ```bash
+    git clone [https://github.com/Syaif05/LCP-Media.git](https://github.com/Syaif05/LCP-Media.git)
+    cd LCP-Media
+    ```
+
+2.  **Install Dependencies**
+    ```bash
+    npm install
+    ```
+
+3.  **Jalankan Mode Dev**
+    ```bash
+    npm run dev
+    ```
+    Perintah ini akan menjalankan Vite (Frontend) dan Electron (Backend) secara bersamaan.
+
+4.  **Build Aplikasi (Produksi)**
+    ```bash
+    npm run electron:build
+    ```
+    Hasil build (installer) akan berada di folder `dist-electron/`.
+
+---
+
+## 🤝 Kontribusi
+
+Kontribusi sangat diterima! Silakan buat **Pull Request** untuk fitur baru atau perbaikan bug.
+1.  Fork proyek ini.
+2.  Buat branch fitur Anda (`git checkout -b fitur-keren`).
+3.  Commit perubahan Anda (`git commit -m 'Menambahkan fitur keren'`).
+4.  Push ke branch (`git push origin fitur-keren`).
+5.  Buka Pull Request.
+
+---
+
+## 📝 Lisensi
+
+Dilisensikan di bawah [MIT License](LICENSE).
+Dibuat dengan ❤️ oleh **Syaifulloh**.
+
+---
+
+### 📸 Screenshot
+
+*(Anda bisa menambahkan screenshot aplikasi di sini nanti setelah di-upload ke GitHub)*

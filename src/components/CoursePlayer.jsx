@@ -1,6 +1,7 @@
 // src/components/CoursePlayer.jsx
-import React from 'react';
+import React, { useRef } from 'react';
 import useCoursePlayer from '../hooks/useCoursePlayer';
+import useKeyboardShortcuts from '../hooks/useKeyboardShortcuts';
 import PlayerHeader from './player/PlayerHeader';
 import VideoSection from './player/VideoSection';
 import TabsSection from './player/TabsSection';
@@ -9,6 +10,17 @@ import DownloadModal from './modals/DownloadModal';
 
 const CoursePlayer = ({ course, onBack, isSidebarCollapsed, toggleSidebar }) => {
   const { state, actions } = useCoursePlayer(course);
+  const playerRef = useRef(null);
+
+  useKeyboardShortcuts({
+    togglePlay: () => playerRef.current?.togglePlay(),
+    seekForward: () => playerRef.current?.seek(5),
+    seekBackward: () => playerRef.current?.seek(-5),
+    increaseVolume: () => playerRef.current?.setVolume(0.1),
+    decreaseVolume: () => playerRef.current?.setVolume(-0.1),
+    toggleMute: () => playerRef.current?.toggleMute(),
+    toggleFullscreen: () => playerRef.current?.toggleFullscreen(),
+  });
 
   const handleCloseModal = () => {
     if (!state.isDownloading) {
@@ -26,6 +38,10 @@ const CoursePlayer = ({ course, onBack, isSidebarCollapsed, toggleSidebar }) => 
     actions.setShowDownloadModal(true);
   };
 
+  const startTime = state.currentVideo && state.watchedVideos[state.currentVideo.id] 
+    ? (state.watchedVideos[state.currentVideo.id].currentTime || 0) 
+    : 0;
+
   return (
     <div className="flex flex-col h-full">
       <PlayerHeader 
@@ -38,6 +54,7 @@ const CoursePlayer = ({ course, onBack, isSidebarCollapsed, toggleSidebar }) => 
       <div className="flex flex-col lg:flex-row flex-1 gap-6 overflow-hidden">
         <div className={`flex flex-col overflow-hidden gap-4 transition-all duration-300 ${isSidebarCollapsed ? 'flex-[4]' : 'flex-[3]'}`}>
           <VideoSection 
+            ref={playerRef}
             currentVideo={state.currentVideo}
             subtitleUrl={state.subtitleUrl}
             onEnded={() => actions.toggleWatched(state.currentVideo.id)}
@@ -54,6 +71,8 @@ const CoursePlayer = ({ course, onBack, isSidebarCollapsed, toggleSidebar }) => 
             isCloudFile={state.currentVideo?.isCloud}
             isDownloaded={state.currentVideo?.isDownloaded}
             onDownloadLocal={handleDownloadClick}
+            startTime={startTime}
+            onTimeUpdate={actions.handleTimeUpdate}
           />
 
           <TabsSection 

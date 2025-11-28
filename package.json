@@ -1,7 +1,7 @@
 {
   "name": "lcp-media",
   "private": true,
-  "version": "0.2.0",
+  "version": "0.3.0",
   "main": "electron/main.js",
   "scripts": {
     "dev": "concurrently \"vite\" \"wait-on tcp:5173 && electron .\"",
@@ -17,6 +17,13 @@
       "target": "nsis",
       "icon": "assets/icon.ico"
     },
+    "fileAssociations": [
+      {
+        "ext": ["mp4", "mkv", "avi", "mov", "webm"],
+        "name": "Video File",
+        "role": "Viewer"
+      }
+    ],
     "directories": {
       "output": "dist-electron"
     }
@@ -27,10 +34,15 @@
     "ffprobe-static": "^3.1.0",
     "fluent-ffmpeg": "^2.1.3",
     "framer-motion": "^11.0.8",
+    "i18next": "^23.10.0",
+    "i18next-browser-languagedetector": "^7.2.0",
     "lowdb": "^7.0.1",
     "lucide-react": "^0.344.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-i18next": "^14.0.5",
+    "react-virtuoso": "^4.7.1",
+    "sonner": "^1.4.3",
     "tailwind-merge": "^2.2.1"
   },
   "devDependencies": {

@@ -1,15 +1,15 @@
 // src/components/player/VideoSection.jsx
-import React, { useEffect } from 'react';
+import React, { useEffect, forwardRef } from 'react';
 import VideoHeader from './video-parts/VideoHeader';
 import VideoPlayer from './video-parts/VideoPlayer';
 import VideoControls from './video-parts/VideoControls';
 
-const VideoSection = ({ 
+const VideoSection = forwardRef(({ 
   currentVideo, subtitleUrl, onEnded, playbackSpeed, onSpeedChange,
   isSidebarCollapsed, toggleSidebar, subSettings, setSubSettings,
   subtitleTracks, selectedTrackIndex, onTrackChange, isExtractingSub,
-  isCloudFile, isDownloaded, onDownloadLocal
-}) => {
+  isCloudFile, isDownloaded, onDownloadLocal, startTime, onTimeUpdate
+}, ref) => {
 
   useEffect(() => {
     const styleId = 'dynamic-subtitle-style';
@@ -52,12 +52,15 @@ const VideoSection = ({
       />
       
       <VideoPlayer 
+        ref={ref}
         currentVideo={currentVideo}
         subtitleUrl={subtitleUrl}
         subSettings={subSettings}
         playbackSpeed={playbackSpeed}
         onEnded={onEnded}
         isExtractingSub={isExtractingSub}
+        startTime={startTime}
+        onTimeUpdate={onTimeUpdate}
       />
 
       <VideoControls 
@@ -73,6 +76,8 @@ const VideoSection = ({
       />
     </div>
   );
-};
+});
+
+VideoSection.displayName = "VideoSection";
 
 export default VideoSection;

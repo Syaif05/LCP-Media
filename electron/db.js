@@ -6,8 +6,6 @@ const { app } = require('electron');
 const userDataPath = app.getPath('userData');
 const dbPath = path.join(userDataPath, 'courses-data.json');
 const settingsPath = path.join(userDataPath, 'settings.json');
-
-// Default Download Path
 const defaultDownloadPath = path.join(app.getPath('videos'), 'LCP_Downloads');
 
 function readDb() {
@@ -27,12 +25,11 @@ function writeDb(data) {
   fs.writeFileSync(dbPath, JSON.stringify(data, null, 2));
 }
 
-// SETTINGS FUNCTIONS
+// ... (getSettings & saveSettings TETAP SAMA) ...
 function getSettings() {
   try {
     if (!fs.existsSync(settingsPath)) {
       const defaultSettings = { downloadPath: defaultDownloadPath };
-      // Buat folder jika belum ada
       if (!fs.existsSync(defaultDownloadPath)) fs.mkdirSync(defaultDownloadPath, { recursive: true });
       fs.writeFileSync(settingsPath, JSON.stringify(defaultSettings));
       return defaultSettings;
@@ -47,13 +44,13 @@ function saveSettings(settings) {
   fs.writeFileSync(settingsPath, JSON.stringify(settings, null, 2));
 }
 
+// ... (addCourse, getCourses TETAP SAMA) ...
 function addCourse(course) {
   const db = readDb();
   const exists = db.courses.find(c => c.path === course.path);
   if (!exists) {
     course.data = {}; 
-    course.lastPlayedAt = new Date().toISOString();
-    // Tambahkan displayName (default sama dengan title folder)
+    course.lastPlayedAt = new Date().toISOString(); 
     course.displayName = course.title; 
     db.courses.push(course);
     writeDb(db);
@@ -66,6 +63,7 @@ function getCourses() {
   return db.courses.sort((a, b) => new Date(b.lastPlayedAt || 0) - new Date(a.lastPlayedAt || 0));
 }
 
+// UPDATE: Handle 'progress' (currentTime)
 function updateVideoData(coursePath, videoId, key, value) {
   const db = readDb();
   const courseIndex = db.courses.findIndex(c => c.path === coursePath);
@@ -74,11 +72,15 @@ function updateVideoData(coursePath, videoId, key, value) {
     if (!db.courses[courseIndex].data) db.courses[courseIndex].data = {};
     if (!db.courses[courseIndex].data[videoId]) db.courses[courseIndex].data[videoId] = {};
     
+    // Simpan data spesifik
     db.courses[courseIndex].data[videoId][key] = value;
     
-    const totalVideos = db.courses[courseIndex].totalVideos;
-    const watchedCount = Object.values(db.courses[courseIndex].data).filter(v => v.watched).length;
-    db.courses[courseIndex].progress = Math.round((watchedCount / totalVideos) * 100);
+    // Update persentase global kursus hanya jika status 'watched' berubah
+    if (key === 'watched') {
+      const totalVideos = db.courses[courseIndex].totalVideos;
+      const watchedCount = Object.values(db.courses[courseIndex].data).filter(v => v.watched).length;
+      db.courses[courseIndex].progress = Math.round((watchedCount / totalVideos) * 100);
+    }
 
     writeDb(db);
     return db.courses[courseIndex];
@@ -86,6 +88,7 @@ function updateVideoData(coursePath, videoId, key, value) {
   return null;
 }
 
+// ... (Sisa fungsi: updateLastPlayed, attachment, dll TETAP SAMA, copy paste dari sebelumnya) ...
 function updateLastPlayed(coursePath, videoId) {
   const db = readDb();
   const courseIndex = db.courses.findIndex(c => c.path === coursePath);
@@ -132,9 +135,10 @@ function getVideoData(coursePath, videoId) {
   const db = readDb();
   const course = db.courses.find(c => c.path === coursePath);
   if (course && course.data && course.data[videoId]) {
-    return course.data[videoId];
+    return course.data[videoId]; // Mengembalikan object { watched, note, currentTime, etc }
   }
-  return { watched: false, note: '', attachments: [] };
+  // Default values
+  return { watched: false, note: '', attachments: [], currentTime: 0 };
 }
 
 function resetDatabase() {
@@ -146,7 +150,6 @@ function resetDatabase() {
 function deleteCourse(courseId) {
   const db = readDb();
   const filteredCourses = db.courses.filter(c => c.id !== courseId);
-  
   if (db.courses.length !== filteredCourses.length) {
     db.courses = filteredCourses;
     writeDb(db);
@@ -155,12 +158,11 @@ function deleteCourse(courseId) {
   return false;
 }
 
-// FUNGSI BARU: Ganti Nama Kursus
 function renameCourse(courseId, newName) {
   const db = readDb();
   const course = db.courses.find(c => c.id === courseId);
   if (course) {
-    course.displayName = newName; // Simpan nama tampilan baru
+    course.displayName = newName; 
     writeDb(db);
     return true;
   }
@@ -171,5 +173,5 @@ module.exports = {
   addCourse, getCourses, updateVideoData, getVideoData, 
   addVideoAttachment, removeVideoAttachment, updateLastPlayed, 
   resetDatabase, getSettings, saveSettings,
-  deleteCourse, renameCourse // Export fungsi baru
+  deleteCourse, renameCourse 
 };

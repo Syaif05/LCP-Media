@@ -1,0 +1,64 @@
+{
+  "menu": {
+    "dashboard": "Dashboard",
+    "library": "My Library",
+    "settings": "Settings",
+    "recent": "Recent Activity",
+    "store": "Visit Store",
+    "supported": "Supported By",
+    "version": "v0.3.0 Pro"
+  },
+  "dashboard": {
+    "welcome": "Dashboard",
+    "subtitle": "Your learning activity overview",
+    "continue": "Continue Learning",
+    "resumeBtn": "Resume Course",
+    "import": "Import Course",
+    "seeAll": "See All Library",
+    "empty": "No recent courses found."
+  },
+  "library": {
+    "title": "My Library",
+    "subtitle": "You have {{count}} courses in your collection.",
+    "search": "Search collection...",
+    "empty": "No courses found matching",
+    "videos": "Videos",
+    "progress": "Progress"
+  },
+  "settings": {
+    "title": "Settings",
+    "general": "General",
+    "downloads": "Downloads",
+    "language": "Language",
+    "appData": "App Data",
+    "openFolder": "Open Folder",
+    "danger": "Danger Zone",
+    "reset": "Factory Reset App",
+    "downloadLoc": "Download Location",
+    "change": "Change",
+    "usedSpace": "Used Space",
+    "files": "Downloaded Files",
+    "noFiles": "No downloaded files yet."
+  },
+  "player": {
+    "notes": "My Notes",
+    "files": "Files",
+    "linked": "Linked to this Video",
+    "addFile": "Add File",
+    "generalFiles": "General Course Files",
+    "saved": "Saved",
+    "saving": "Saving...",
+    "placeholder": "Start typing notes for this video here..."
+  },
+  "toast": {
+    "downloadStarted": "Download started...",
+    "downloadSuccess": "Download completed successfully",
+    "downloadFailed": "Download failed",
+    "markedWatched": "Marked as watched",
+    "fileAttached": "File attached successfully",
+    "fileRemoved": "File removed",
+    "subLoaded": "External subtitle loaded",
+    "subExtracted": "Subtitle extracted successfully",
+    "subFailed": "Failed to extract subtitle"
+  }
+}
